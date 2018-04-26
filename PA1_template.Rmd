@@ -7,18 +7,50 @@ output:
 
 
 ## Loading and preprocessing the data
-
-
-
+Here is the code for loading data
+```{r loaddata, echo=TRUE}
+Mydata <- read.csv(file = "C:/Users/yzhang/Documents/GitHub/RepData_PeerAssessment1/activity/activity.csv", header = TRUE, sep = ",")
+```
 ## What is mean total number of steps taken per day?
-
-
+Here is the code to calculate the total steps
+```{r CalculateStepsperDay, echo=TRUE}
+totalStepbyDay <- tapply(Mydata$steps, Mydata$date, sum, na.rm = TRUE)
+```
+Below is the code to generate the histogram
+```{r Createhistogram, echo=TRUE}
+hist(totalStepbyDay, breaks = 10)
+```
+Below is the code for calculating the mean and its output
+```{r CalculateMean, echo=TRUE}
+Mymean <- mean(totalStepbyDay)
+print(Mymean, type = "html")
+```
+Below is the code for calculating the median and its output
+```{r CalculateMedian, echo=TRUE}
+Mymedian <- median(totalStepbyDay)
+print(Mymedian, type = "html")
+```
 
 ## What is the average daily activity pattern?
-
-
+Below is the code for calculate the average steps grouping by intervals.
+```{r CalculateAverageSteps, echo=TRUE}
+library(dplyr)
+StepsbyInterval <- Mydata %>%
+  group_by(interval) %>%
+  summarise(average_steps = mean(steps, na.rm = TRUE))
+```
+Plot the data
+```{r PlotLineChart, echo = TRUE}
+with(StepsbyInterval, plot(interval, average_steps, type = "l", xlab = "intervals", ylab = "average steps", main = "Average Daily Activity Pattern"))
+```
+Report which 5-minute interval contains the maximum number of steps.
+```{r ReportMaxiumStepsbyInterval, echo=TRUE}
+MaxiumStepsbyInterval <- StepsbyInterval[StepsbyInterval$average_steps == max(StepsbyInterval$average_steps), ]
+print(MaxiumStepsbyInterval, type = "html")
+```
 
 ## Imputing missing values
+
 
 
 
