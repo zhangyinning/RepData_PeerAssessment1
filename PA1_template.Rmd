@@ -51,7 +51,65 @@ print(MaxiumStepsbyInterval, type = "html")
 
 ## Imputing missing values
 
+Report number of rows with NAs.
+```{r NumberofNAs, echo=TRUE}
+NumberofNAs <- sum(is.na(Mydata$steps))
+print(NumberofNAs, type = "html")
+```
 
+Replace the NAs with means of steps of the same interval
+```{r ReplaceNAs, echo=TRUE}
+library(dplyr)
+Newdata<- Mydata %>%
+  group_by(interval) %>%
+  mutate(steps = ifelse(is.na(steps), as.integer(mean(steps, na.rm = TRUE)), steps))
+```
 
+Calculate the total steps taken each day and make the histogram
+```{r TotalStepsbyDaywithNewData, echo=TRUE}
+StepsbyDay <- tapply(Newdata$steps, Newdata$date, sum)
+hist(StepsbyDay, breaks = 10)
+```
+
+Below is the code for calculating the NEW mean and its output
+```{r CalculateNewMean, echo=TRUE}
+Mynewmean <- mean(StepsbyDay)
+print(Mynewmean, type = "html")
+```
+
+Below is the code for calculating the median and its output
+```{r CalculateNewMedian, echo=TRUE}
+Mynewmedian <- median(StepsbyDay)
+print(Mynewmedian, type = "html")
+```
+
+Conclusion: From the histogram, we can see that the frequency of Zero steps decreases, as the missing values are replaced with the mean value of steps of the same interval. So, the mean an median moved slightly to the right.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Add a new column showing weekend or not
+```{r AddWeekendColumn, echo = TRUE}
+Newdata$date <- as.Date(as.character(Newdata$date))
+WeekdayNewdata <- Newdata %>%
+  mutate(Weekend = (weekdays(date) %in% c("Sunday", "Saturday")))
+```
+
+Create two seperate subset of data for weekend and weekday
+```{r TwoSubsetWeekdayWeekend, echo = TRUE}
+StepbyIntervalWeekday <- WeekdayNewdata %>%
+  subset(Weekend == FALSE) %>%
+  group_by(interval) %>%
+  summarise(average_steps = mean(steps))
+
+StepbyIntervalWeekend <- WeekdayNewdata %>%
+  subset(Weekend == TRUE) %>%
+  group_by(interval) %>%
+  summarise(average_steps = mean(steps))
+```
+
+Plot the data
+```{r PlottwoData, echo=TRUE}
+par(mfrow=c(2, 1))
+plot(StepbyIntervalWeekday$interval, StepbyIntervalWeekday$average_steps, type = "l", main = "Weekday")
+plot(StepbyIntervalWeekend$interval, StepbyIntervalWeekend$average_steps, type = "l", main = "Weekend")
+```
