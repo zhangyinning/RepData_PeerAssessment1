@@ -8,57 +8,110 @@ output:
 
 ## Loading and preprocessing the data
 Here is the code for loading data
-```{r loaddata, echo=TRUE}
+
+```r
 Mydata <- read.csv(file = "C:/Users/yzhang/Documents/GitHub/RepData_PeerAssessment1/activity/activity.csv", header = TRUE, sep = ",")
 ```
 ## What is mean total number of steps taken per day?
 Here is the code to calculate the total steps
-```{r CalculateStepsperDay, echo=TRUE}
+
+```r
 totalStepbyDay <- tapply(Mydata$steps, Mydata$date, sum, na.rm = TRUE)
 ```
 Below is the code to generate the histogram
-```{r Createhistogram, echo=TRUE}
+
+```r
 hist(totalStepbyDay, breaks = 10)
 ```
+
+![](PA1_template_files/figure-html/Createhistogram-1.png)<!-- -->
 Below is the code for calculating the mean and its output
-```{r CalculateMean, echo=TRUE}
+
+```r
 Mymean <- mean(totalStepbyDay)
 print(Mymean, type = "html")
 ```
+
+```
+## [1] 9354.23
+```
 Below is the code for calculating the median and its output
-```{r CalculateMedian, echo=TRUE}
+
+```r
 Mymedian <- median(totalStepbyDay)
 print(Mymedian, type = "html")
 ```
 
+```
+## [1] 10395
+```
+
 ## What is the average daily activity pattern?
 Below is the code for calculate the average steps grouping by intervals.
-```{r CalculateAverageSteps, echo=TRUE}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 StepsbyInterval <- Mydata %>%
   group_by(interval) %>%
   summarise(average_steps = mean(steps, na.rm = TRUE))
 ```
 Plot the data
-```{r PlotLineChart, echo = TRUE}
+
+```r
 with(StepsbyInterval, plot(interval, average_steps, type = "l", xlab = "intervals", ylab = "average steps", main = "Average Daily Activity Pattern"))
 ```
+
+![](PA1_template_files/figure-html/PlotLineChart-1.png)<!-- -->
 Report which 5-minute interval contains the maximum number of steps.
-```{r ReportMaxiumStepsbyInterval, echo=TRUE}
+
+```r
 MaxiumStepsbyInterval <- StepsbyInterval[StepsbyInterval$average_steps == max(StepsbyInterval$average_steps), ]
 print(MaxiumStepsbyInterval, type = "html")
+```
+
+```
+## # A tibble: 1 x 2
+##   interval average_steps
+##      <int>         <dbl>
+## 1      835          206.
 ```
 
 ## Imputing missing values
 
 Report number of rows with NAs.
-```{r NumberofNAs, echo=TRUE}
+
+```r
 NumberofNAs <- sum(is.na(Mydata$steps))
 print(NumberofNAs, type = "html")
 ```
 
+```
+## [1] 2304
+```
+
 Replace the NAs with means of steps of the same interval
-```{r ReplaceNAs, echo=TRUE}
+
+```r
 library(dplyr)
 Newdata<- Mydata %>%
   group_by(interval) %>%
@@ -66,21 +119,34 @@ Newdata<- Mydata %>%
 ```
 
 Calculate the total steps taken each day and make the histogram
-```{r TotalStepsbyDaywithNewData, echo=TRUE}
+
+```r
 StepsbyDay <- tapply(Newdata$steps, Newdata$date, sum)
 hist(StepsbyDay, breaks = 10)
 ```
 
+![](PA1_template_files/figure-html/TotalStepsbyDaywithNewData-1.png)<!-- -->
+
 Below is the code for calculating the NEW mean and its output
-```{r CalculateNewMean, echo=TRUE}
+
+```r
 Mynewmean <- mean(StepsbyDay)
 print(Mynewmean, type = "html")
 ```
 
+```
+## [1] 10749.77
+```
+
 Below is the code for calculating the median and its output
-```{r CalculateNewMedian, echo=TRUE}
+
+```r
 Mynewmedian <- median(StepsbyDay)
 print(Mynewmedian, type = "html")
+```
+
+```
+## [1] 10641
 ```
 
 Conclusion: From the histogram, we can see that the frequency of Zero steps decreases, as the missing values are replaced with the mean value of steps of the same interval. So, the mean an median moved slightly to the right.  
@@ -88,22 +154,34 @@ Conclusion: From the histogram, we can see that the frequency of Zero steps decr
 ## Are there differences in activity patterns between weekdays and weekends?
 
 Add a new column showing weekend or not
-```{r AddWeekendColumn, echo = TRUE}
+
+```r
 Newdata$date <- as.Date(as.character(Newdata$date))
 WeekdayNewdata <- Newdata %>%
   mutate(Weekend = ifelse(weekdays(date) %in% c("Sunday", "Saturday"), 'weekend', 'weekday'))
 ```
 
 Below is the code for calculate the average steps grouping by intervals for the new data including the info of weekend or weekday.
-```{r CalculateAverageStepsforweekdayweekenddata, echo=TRUE}
+
+```r
 StepsbyInterval_withweekday <- WeekdayNewdata %>%
   group_by(interval, Weekend) %>%
   summarise(average_steps = mean(steps))
 ```
 
 Using gglot to plot the data
-```{r PlotData, echo=TRUE}
+
+```r
 library(ggplot2)
+```
+
+```
+## Warning: package 'ggplot2' was built under R version 3.4.4
+```
+
+```r
 g <- ggplot(StepsbyInterval_withweekday, aes(interval, average_steps))
 g+geom_line()+facet_grid(Weekend ~ .)
 ```
+
+![](PA1_template_files/figure-html/PlotData-1.png)<!-- -->
